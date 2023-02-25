@@ -1,0 +1,54 @@
+## this file drives the "Rest Client" vscode extension. I use instead of Postman
+################## MAIN ###
+GET http://localhost:3000 HTTP/1.1
+###
+GET http://localhost:3000/broken.html HTTP/1.1
+###
+GET http://localhost:3000/broken.cgi HTTP/1.1
+###
+GET http://localhost:3000/aboutus.html HTTP/1.1
+###
+################## CAMPSITES ###
+POST http://localhost:3000/campsites HTTP/1.1
+Content-Type: application/json
+
+{
+    "name": "React Lake Campground",
+    "image": "images/react-lake.jpg",
+    "elevation": 1233,
+    "featured": false,
+    "cost": 65,
+    "description": "Nestled in the foothills of the Chrome Mountains, this campground on the shores of the pristine React Lake is a favorite for fly fishers."
+}
+
+###
+GET http://localhost:3000/campsites
+###
+GET http://localhost:3000/campsites/23
+###
+DELETE http://localhost:3000/campsites/23
+################## PROMOTIONS ###
+GET http://localhost:3000/promotions
+###
+GET http://localhost:3000/promotions/63fa51d6f00473816cfd7229
+###
+DELETE http://localhost:3000/promotions/23
+###
+POST http://localhost:3000/promotions HTTP/1.1
+Content-Type: application/json
+
+{
+    "name": "Mountain Adventure",
+    "image": "images/breadcrumb-trail.jpg",
+    "featured": true,
+    "cost": 1299,
+    "description": "Book a 5-day mountain trek with a seasoned outdoor guide! Fly fishing equipment and lessons provided."
+}
+################## PARTNERS ###
+GET http://localhost:3000/partners
+###
+GET http://localhost:3000/partners/23
+###
+DELETE http://localhost:3000/partners/23
+###
+DELETE http://localhost:3000/partners

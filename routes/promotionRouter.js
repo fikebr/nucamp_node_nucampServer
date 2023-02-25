@@ -1,46 +1,74 @@
 const express = require('express');
 const promotionRouter = express.Router();
+const Promotion = require('../models/promotion');
 
 const section = 'promotion'
 
 promotionRouter.route('/')
 .all((req, res, next) => {
     res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
+    res.setHeader('Content-Type', 'application/json');
     next();
 })
-.get((req, res) => {
-    res.end(`Will send all the ${section}s to you`);
+.get((req, res, next) => {
+    Promotion.find()
+    .then(promotions => {
+        res.json(promotions);
+    })
+    .catch(err => next(err));
 })
-.post((req, res) => {
-    res.end(`Will add the ${section}: ${req.body.name} with description: ${req.body.description}`);
+.post((req, res, next) => {
+    Promotion.create(req.body)
+    .then(promotion => {
+        console.log('Promotion Created: ', promotion);
+        res.json(promotion);
+    })
+    .catch(err => next(err));
 })
 .put((req, res) => {
     res.statusCode = 403;
     res.end(`PUT operation not supported on /${section}`);
 })
-.delete((req, res) => {
-    res.end(`Deleting all ${section}s`);
+.delete((req, res, next) => {
+    Promotion.deleteMany()
+    .then(response => {
+        res.json(response);
+    })
+    .catch(err => next(err));
 });
 
 promotionRouter.route('/:promotionId')
 .all((req, res, next) => {
     res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
+    res.setHeader('Content-Type', 'application/json');
     next();
 })
-.get((req, res) => {
-    res.end(`Will send the ${section} ${req.params.promotionId} to you`);
+.get((req, res, next) => {
+    Promotion.findById(req.params.promotionId)
+    .then(promotion => {
+        res.json(promotion);
+    })
+    .catch(err => next(err));
 })
 .post((req, res) => {
-    res.end(`Will add the ${section}: ${req.body.name} with description: ${req.body.description}`);
-})
-.put((req, res) => {
     res.statusCode = 403;
-    res.end(`PUT operation not supported on /${section}s`);
+    res.end(`POST operation not supported on /${section}s/${req.params.promotionId}`);
 })
-.delete((req, res) => {
-    res.end(`Deleting ${section} ${req.params.promotionId}`);
+.put((req, res, next) => {
+    Promotion.findByIdAndUpdate(req.params.promotionId, {
+        $set: req.body
+    }, {new: true})
+    .then(promotion => {
+        res.json(promotion);
+    })
+    .catch(err => next(err));
+})
+.delete((req, res, next) => {
+    Promotion.findByIdAndDelete(req.params.promotionId)
+    .then(response => {
+        res.json(response);
+    })
+    .catch(err => next(err));
 });
 
 module.exports = promotionRouter;
