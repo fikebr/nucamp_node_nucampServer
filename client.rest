@@ -44,6 +44,15 @@ Content-Type: application/json
     "cost": 1299,
     "description": "Book a 5-day mountain trek with a seasoned outdoor guide! Fly fishing equipment and lessons provided."
 }
+###
+PUT http://localhost:3000/promotions/63fa51d6f00473816cfd7229
+Content-Type: application/json
+
+{
+    "description": "Book a 5-day mountain trek with a seasoned outdoor guide! Fly fishing equipment and lessons provided. More text"
+}
+
+
 ################## PARTNERS ###
 GET http://localhost:3000/partners
 ###
