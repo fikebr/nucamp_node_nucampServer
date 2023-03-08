@@ -1,19 +1,24 @@
 const express = require('express');
-const passport = require('passport');
 const router = express.Router();
-
-const User = require('../models/user');
+const passport = require('passport'); 
+const User = require('../models/users');
 const authenticate = require('../authenticate');
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-    res.send('respond with a resource');
-});
+
+router.get('/',authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next) => {
+    User.find()
+    .then(users => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(users);
+    })
+    .catch(err => next(err));
+})
 
 router.post('/signup', (req, res) => {
     User.register(
         new User({username: req.body.username}),
-        req.body.password,
+        req.body.password, 
         (err, user) => {
             if (err) {
                 res.statusCode = 500;
@@ -26,7 +31,7 @@ router.post('/signup', (req, res) => {
                 if (req.body.lastname) {
                     user.lastname = req.body.lastname;
                 }
-                user.save(err => {
+                user.save(err => { //saves user's first and last names from req body to the database
                     if (err) {
                         res.statusCode = 500;
                         res.setHeader('Content-Type', 'application/json');
@@ -45,7 +50,7 @@ router.post('/signup', (req, res) => {
 });
 
 router.post('/login', passport.authenticate('local'), (req, res) => {
-    const token = authenticate.getToken({_id: req.user._id});
+    const token = authenticate.getToken({_id: req.user._id}); // token issued here, user id passed as paylod
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
     res.json({success: true, token: token, status: 'You are successfully logged in!'});
@@ -53,13 +58,13 @@ router.post('/login', passport.authenticate('local'), (req, res) => {
 
 router.get('/logout', (req, res, next) => {
     if (req.session) {
-        req.session.destroy();
-        res.clearCookie('session-id');
-        res.redirect('/');
+      req.session.destroy(); // deleting the session file on server side
+      res.clearCookie('session-id'); // clearing the cookie with session id stored in it on client side 
+      res.redirect('/'); //localhost/3000/
     } else {
-        const err = new Error('You are not logged in!');
-        err.status = 401;
-        return next(err);
+      const err = new Error('You are not logged in!');
+      err.status = 403;
+      return next(err);
     }
 });
 

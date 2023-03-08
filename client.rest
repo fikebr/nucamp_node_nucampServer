@@ -61,3 +61,14 @@ GET http://localhost:3000/partners/23
 DELETE http://localhost:3000/partners/23
 ###
 DELETE http://localhost:3000/partners
+
+################## USERS ###
+POST http://localhost:3000/users/signup
+Content-Type: application/json
+
+{
+    "username": "bradfike",
+    "firstname": "Brad",
+    "lastname": "Fike",
+    "password": "bfike666"
+}
