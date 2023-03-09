@@ -3,9 +3,13 @@ const router = express.Router();
 const passport = require('passport'); 
 const User = require('../models/users');
 const authenticate = require('../authenticate');
+const cors = require('./cors');
 
+const usersRouter = express.Router();
 
-router.get('/',authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next) => {
+usersRouter.route('/')
+.options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
+.get(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next) => {
     User.find()
     .then(users => {
         res.statusCode = 200;
@@ -15,7 +19,9 @@ router.get('/',authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next
     .catch(err => next(err));
 })
 
-router.post('/signup', (req, res) => {
+usersRouter.route('/signup')
+.options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
+.post(cors.corsWithOptions, (req, res) => {
     User.register(
         new User({username: req.body.username}),
         req.body.password, 
@@ -49,14 +55,18 @@ router.post('/signup', (req, res) => {
     );
 });
 
-router.post('/login', passport.authenticate('local'), (req, res) => {
+usersRouter.route('/login')
+.options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
+.post(cors.corsWithOptions, passport.authenticate('local'), (req, res) => {
     const token = authenticate.getToken({_id: req.user._id}); // token issued here, user id passed as paylod
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
     res.json({success: true, token: token, status: 'You are successfully logged in!'});
 });
 
-router.get('/logout', (req, res, next) => {
+usersRouter.route('/logout')
+.options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
+.get(cors.corsWithOptions, (req, res, next) => {
     if (req.session) {
       req.session.destroy(); // deleting the session file on server side
       res.clearCookie('session-id'); // clearing the cookie with session id stored in it on client side 
@@ -68,4 +78,4 @@ router.get('/logout', (req, res, next) => {
     }
 });
 
-module.exports = router;
+module.exports = usersRouter;
