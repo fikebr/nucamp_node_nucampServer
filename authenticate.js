@@ -4,20 +4,54 @@ const User = require('./models/users');
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt; // will provide several methods; one of them will be used to extract a token from req object
 const jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
+const FacebookTokenStrategy = require('passport-facebook-token');
 
 const config = require('./config.js');
+require('dotenv').config();
+const secretKey = process.env.secretKey;
+
+exports.facebookPassport = passport.use(
+    new FacebookTokenStrategy(
+        {
+            clientID: process.env.fb_id,
+            clientSecret: process.env.fb_secret
+        }, 
+        (accessToken, refreshToken, profile, done) => {
+            User.findOne({facebookId: profile.id}, (err, user) => {
+                if (err) {
+                    return done(err, false);
+                }
+                if (!err && user) {
+                    return done(null, user);
+                } else {
+                    user = new User({ username: profile.displayName });
+                    user.facebookId = profile.id;
+                    user.firstname = profile.name.givenName;
+                    user.lastname = profile.name.familyName;
+                    user.save((err, user) => {
+                        if (err) {
+                            return done(err, false);
+                        } else {
+                            return done(null, user);
+                        }
+                    });
+                }
+            });
+        }
+    )
+);
 
 exports.local = passport.use(new LocalStrategy(User.authenticate()));// User.authenticate() verifies the req username and password against usernames and passwords in the database
 passport.serializeUser(User.serializeUser()); // converts user data from req object to be able to be stored
 passport.deserializeUser(User.deserializeUser());
 
 exports.getToken = user => {
-    return jwt.sign(user, config.secretKey, {expiresIn: 3600}); //returns a token; expires in 1 hour
+    return jwt.sign(user, secretKey, {expiresIn: 3600}); //returns a token; expires in 1 hour
 };
 
 const opts = {};
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken(); // specifies how json web token should be extracted from incoming req object; from authorization header in this case
-opts.secretOrKey = config.secretKey;
+opts.secretOrKey = secretKey;
 
 exports.jwtPassport = passport.use(
     new JwtStrategy(
